@@ -23,6 +23,7 @@ builder.Services.AddAutoMapper(typeof(Program));
 
 // Service injection
 builder.Services.AddScoped<IOrderRepositoryAsync, OrderRepositoryAsync>();
+builder.Services.AddScoped<IOrderDetailRepositoryAsync, OrderDetailRepositoryAsync>();
 
 // Repository injection
 builder.Services.AddScoped<IOrderServiceAsync, OrderServiceAsync>();

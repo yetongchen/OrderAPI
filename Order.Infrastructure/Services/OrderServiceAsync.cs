@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore.ChangeTracking;
+﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Order.ApplicationCore.Contracts.IRepositories;
 using Order.ApplicationCore.Contracts.IServices;
 using Order.ApplicationCore.Entities;
@@ -15,9 +16,11 @@ namespace Order.Infrastructure.Services
     public class OrderServiceAsync : IOrderServiceAsync
     {
         private readonly IOrderRepositoryAsync orderRepository;
-        public OrderServiceAsync(IOrderRepositoryAsync orderRepository)
+        private readonly IMapper mapper;
+        public OrderServiceAsync(IOrderRepositoryAsync orderRepository, IMapper mapper)
         {
             this.orderRepository = orderRepository;
+            this.mapper = mapper;
         }
         public async Task<int> DeleteOrder(int id)
         {
@@ -26,119 +29,33 @@ namespace Order.Infrastructure.Services
 
         public async Task<IEnumerable<OrderResponseModel>> GetAllOrders()
         {
-            var orders = await orderRepository.GetAllAsync();
-            return orders.Select(order => new OrderResponseModel
-            {
-                Id = order.Id,
-                OrderDate = order.OrderDate,
-                CustomerId = order.CustomerId,
-                CustomerName = order.CustomerName,
-                PaymentMethodId = order.PaymentMethodId,
-                PaymentName = order.PaymentName,
-                ShippingAddress = order.ShippingAddress,
-                ShippingMethod = order.ShippingMethod,
-                BillAmount = order.BillAmount,
-                OrderStatus = order.OrderStatus,
-                OrderDetails = order.OrderDetails.Select(detail => new OrderDetailResponseModel
-                {
-                    ProductId = detail.ProductId,
-                    ProductName = detail.ProductName,
-                    Qty = detail.Qty,
-                    Price = detail.Price,
-                    Discount = detail.Discount
-                }).ToList()
-            });
+            return mapper.Map<IEnumerable<OrderResponseModel>>(await orderRepository.GetAllAsync());
         }
 
         public async Task<IEnumerable<OrderResponseModel>> GetOrdersByCustomerId(int customerId)
         {
-            var orders = await orderRepository.GetOrdersByCustomerIdAsync(customerId);
-            return orders.Select(order => new OrderResponseModel
-            {
-                Id = order.Id,
-                OrderDate = order.OrderDate,
-                CustomerId = order.CustomerId,
-                CustomerName = order.CustomerName,
-                PaymentMethodId = order.PaymentMethodId,
-                PaymentName = order.PaymentName,
-                ShippingAddress = order.ShippingAddress,
-                ShippingMethod = order.ShippingMethod,
-                BillAmount = order.BillAmount,
-                OrderStatus = order.OrderStatus,
-                OrderDetails = order.OrderDetails.Select(detail => new OrderDetailResponseModel
-                {
-                    ProductId = detail.ProductId,
-                    ProductName = detail.ProductName,
-                    Qty = detail.Qty,
-                    Price = detail.Price,
-                    Discount = detail.Discount
-                }).ToList()
-            });
+            return mapper.Map<IEnumerable<OrderResponseModel>>(await orderRepository.GetOrdersByCustomerIdAsync(customerId));
         }
 
         public async Task<OrderResponseModel?> GetOrderById(int id)
         {
-            var order = await orderRepository.GetByIdAsync(id);
-            if (order != null)
-            {
-                return new OrderResponseModel
-                {
-                    Id = order.Id,
-                    OrderDate = order.OrderDate,
-                    CustomerId = order.CustomerId,
-                    CustomerName = order.CustomerName,
-                    PaymentMethodId = order.PaymentMethodId,
-                    PaymentName = order.PaymentName,
-                    ShippingAddress = order.ShippingAddress,
-                    ShippingMethod = order.ShippingMethod,
-                    BillAmount = order.BillAmount,
-                    OrderStatus = order.OrderStatus,
-                    OrderDetails = order.OrderDetails.Select(detail => new OrderDetailResponseModel
-                    {
-                        ProductId = detail.ProductId,
-                        ProductName = detail.ProductName,
-                        Qty = detail.Qty,
-                        Price = detail.Price,
-                        Discount = detail.Discount
-                    }).ToList()
-                };
-            }
-            return null;
+            return mapper.Map<OrderResponseModel>(await orderRepository.GetByIdAsync(id));
         }
 
         public async Task<int> InsertOrder(OrderRequestModel model)
         {
-            var order = new Order.ApplicationCore.Entities.Order
-            {
-                OrderDate = model.OrderDate,
-                CustomerId = model.CustomerId,
-                CustomerName = model.CustomerName,
-                PaymentMethodId = model.PaymentMethodId,
-                PaymentName = model.PaymentName,
-                ShippingAddress = model.ShippingAddress,
-                ShippingMethod = model.ShippingMethod,
-                BillAmount = model.BillAmount,
-                OrderStatus = model.OrderStatus
-            };
+            var order = mapper.Map<Order.ApplicationCore.Entities.Order>(model);
             return await orderRepository.InsertAsync(order);
         }
 
-        public async Task<int> UpdateOrder(OrderRequestModel model)
+        public async Task<int> UpdateOrder(OrderRequestModel model, int id)
         {
-            var order = new Order.ApplicationCore.Entities.Order
+            if (id == model.Id)
             {
-                Id = model.Id,
-                OrderDate = model.OrderDate,
-                CustomerId = model.CustomerId,
-                CustomerName = model.CustomerName,
-                PaymentMethodId = model.PaymentMethodId,
-                PaymentName = model.PaymentName,
-                ShippingAddress = model.ShippingAddress,
-                ShippingMethod = model.ShippingMethod,
-                BillAmount = model.BillAmount,
-                OrderStatus = model.OrderStatus
-            };
-            return await orderRepository.UpdateAsync(order);
+                var order = mapper.Map<Order.ApplicationCore.Entities.Order>(model);
+                return await orderRepository.UpdateAsync(order);
+            }
+            return 0;
         }
     }
 }

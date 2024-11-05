@@ -7,7 +7,7 @@ using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace Order.API.Controllers
 {
-    [Route("api/[controller][action]")]
+    [Route("api/[controller]")]
     [ApiController]
     public class OrderController : ControllerBase
     {
@@ -37,6 +37,7 @@ namespace Order.API.Controllers
         }
 
         [HttpGet]
+        [Route("customer/{customerId}")]
         public async Task<IActionResult> GetAOrderByCustomerId(int customerId)
         {
             var orders = await orderService.GetOrdersByCustomerId(customerId);
@@ -44,6 +45,7 @@ namespace Order.API.Controllers
         }
 
         [HttpDelete]
+        [Route("{id}")]
         public async Task<IActionResult> DeleteOrder(int id)
         {
             var result = await orderService.DeleteOrder(id);
@@ -55,13 +57,14 @@ namespace Order.API.Controllers
         }
 
         [HttpPut]
-        public async Task<IActionResult> UpdateOrder(OrderRequestModel orderRequest)
+        [Route("{id}")]
+        public async Task<IActionResult> UpdateOrder([FromBody]OrderRequestModel orderRequest, int id)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
-            var result = await orderService.UpdateOrder(orderRequest);
+            var result = await orderService.UpdateOrder(orderRequest, id);
             if (result == 0)
             {
                 return NotFound();
@@ -70,6 +73,7 @@ namespace Order.API.Controllers
         }
 
         [HttpGet]
+        [Route("{id}")]
         public async Task<IActionResult> GetOrderById(int id)
         {
             var order = await orderService.GetOrderById(id);

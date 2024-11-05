@@ -14,7 +14,7 @@ namespace Order.ApplicationCore.Contracts.IServices
     {
         Task<int> InsertOrder(OrderRequestModel model);
         Task<int> DeleteOrder(int id);
-        Task<int> UpdateOrder(OrderRequestModel model);
+        Task<int> UpdateOrder(OrderRequestModel model, int id);
         Task<OrderResponseModel?> GetOrderById(int id);
         Task<IEnumerable<OrderResponseModel>> GetAllOrders();
         Task<IEnumerable<OrderResponseModel>> GetOrdersByCustomerId(int customerId);
